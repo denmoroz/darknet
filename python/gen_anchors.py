@@ -21,11 +21,13 @@ argparser.add_argument(
 
 argparser.add_argument(
     '--grid_w',
+    default=30,
     type=int,
     help='output grid width')
 
 argparser.add_argument(
     '--grid_h',
+    default=17,
     type=int,
     help='output grid height')
 
@@ -197,13 +199,18 @@ def main(args):
     # run k_mean to find the anchors
     annotation_dims = []
     for image in train_imgs:
+        if image['width'] >= image['height']:
+            assert args.grid_w >= args.grid_h, "Image width >= image height, but grid_w < grid_h"
+        else:
+            assert args.grid_h < args.grid_w, "Image width < image height, but grid_w > grid_h"
+
         cell_w = float(image['width']) / args.grid_w
         cell_h = float(image['height']) / args.grid_h
 
         for obj in image['object']:
             relative_w = (float(obj['xmax']) - float(obj['xmin'])) / cell_w
-            relatice_h = (float(obj["ymax"]) - float(obj['ymin'])) / cell_h
-            annotation_dims.append((relative_w, relatice_h))
+            relative_h = (float(obj['ymax']) - float(obj['ymin'])) / cell_h
+            annotation_dims.append((relative_w, relative_h))
 
     annotation_dims = np.array(annotation_dims)
 
