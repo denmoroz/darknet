@@ -1,10 +1,23 @@
-import sys
 import os
+import argparse
 import xml.etree.ElementTree as ET
 from utils import *
 
 
-def convert_annotation(in_file_path, out_file_path):
+argparser = argparse.ArgumentParser()
+
+argparser.add_argument(
+    '--dataset',
+    help='path to train subset')
+
+argparser.add_argument(
+    '--for_classes',
+    default=None,
+    help='calculate centroids only for specified class'
+)
+
+
+def convert_annotation(in_file_path, out_file_path, valid_classes):
     in_file = open(in_file_path, 'r')
     out_file = open(out_file_path, 'w')
 
@@ -20,6 +33,9 @@ def convert_annotation(in_file_path, out_file_path):
         cls, cls_id = convert_label(obj.find('name').text)
 
         if not cls:
+            continue
+
+        if valid_classes and cls not in valid_classes:
             continue
 
         xmlbox = obj.find('bndbox')
@@ -55,13 +71,18 @@ def convert_annotation(in_file_path, out_file_path):
         raise ValueError('No bboxes converted!')
 
 
-if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        raise ValueError('Dataset path must be specified!')
-
-    dataset_path = sys.argv[1]
-
+def main(args):
     outputs = {}
+
+    dataset_path = args.dataset
+
+    labels = set()
+    if args.for_classes:
+        classes_str = args.for_classes
+        labels = set(map(str.strip, classes_str.split(',')))
+
+        print('Generating bboxes for classes: %s' % labels)
+
     for set_type in SETS:
         subset_path = os.path.join(dataset_path, set_type)
 
@@ -88,7 +109,7 @@ if __name__ == '__main__':
 
                     assert os.path.exists(annotation_path), 'Annotation does not exists!'
 
-                    convert_annotation(annotation_path, label_path)
+                    convert_annotation(annotation_path, label_path, labels)
                     list_file.write(image_path + '\n')
 
                     if not os.path.exists(label_path):
@@ -111,3 +132,8 @@ if __name__ == '__main__':
         )
 
     print('Done!')
+
+
+if __name__ == '__main__':
+    argv = argparser.parse_args()
+    main(argv)
