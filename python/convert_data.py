@@ -76,10 +76,10 @@ def main(args):
 
     dataset_path = args.dataset
 
-    labels = set()
+    labels = CLASSES
     if args.for_classes:
         classes_str = args.for_classes
-        labels = set(map(str.strip, classes_str.split(',')))
+        labels = list(map(str.strip, classes_str.split(',')))
 
         print('Generating bboxes for classes: %s' % labels)
 
@@ -122,13 +122,13 @@ def main(args):
 
     print('Generating classes.names file')
     with open(os.path.join(dataset_path, 'classes.names'), 'w') as classes_file:
-        for class_name in CLASSES:
+        for class_name in labels:
             classes_file.write(class_name + '\n')
 
     print('Generating dataset.data file')
     with open(os.path.join(dataset_path, 'dataset.data'), 'w') as dataset_file:
         dataset_file.write(
-            OUTPUT_TEMPLATE.format(len(CLASSES), outputs['train'], outputs['val'], dataset_path)
+            OUTPUT_TEMPLATE.format(len(labels), outputs['train'], outputs['val'], dataset_path)
         )
 
     print('Done!')
