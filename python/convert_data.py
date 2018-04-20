@@ -1,6 +1,8 @@
 import os
 import argparse
 import xml.etree.ElementTree as ET
+
+from xml.etree.ElementTree import ParseError
 from utils import *
 
 
@@ -115,7 +117,7 @@ def main(args):
                     if not os.path.exists(label_path):
                         raise EnvironmentError('Label file %s was not created!' % label_path)
 
-                except (AssertionError, ValueError) as exc:
+                except (AssertionError, ValueError, ParseError) as exc:
                     print('Cannot process {}: {}'.format(image_file, exc))
 
         outputs[set_type] = list_file_path
