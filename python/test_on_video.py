@@ -34,21 +34,35 @@ argparser.add_argument(
     help='show video in real time'
 )
 
+argparser.add_argument(
+    '-g', '--grid',
+    action='store_true',
+    help='draw_grid'
+)
 
-img_w, img_h = 544, 960
-grid_w, grid_h = 17, 30
+
+# img_w, img_h = 544, 960
+# grid_w, grid_h = 17, 30
+
+img_w, img_h = 512, 512
+grid_w, grid_h = 16, 16
 
 num_anchors = 10
 num_classes = 3
-detect_threshold = 0.1
+detect_threshold = 0.3
 nms_threshold = 0.1
 
 classes = ['complementary_signs', 'white_signs', 'cars']
 colors = [(255, 0, 0), (0, 0, 255), (0, 255, 0)]
 
+# biases = np.array([
+#    [0.235, 0.216], [0.465, 0.371], [0.632, 0.630], [1.113, 0.807], [1.441, 1.368],
+#    [2.418, 2.086], [2.437, 1.090], [4.085, 2.642], [6.040, 4.181], [7.753, 7.054]
+# ])
+
 biases = np.array([
-    [0.235, 0.216], [0.465, 0.371], [0.632, 0.630], [1.113, 0.807], [1.441, 1.368],
-    [2.418, 2.086], [2.437, 1.090], [4.085, 2.642], [6.040, 4.181], [7.753, 7.054]
+    [0.163, 0.260], [0.289, 0.444], [0.424, 0.742], [0.694, 1.133], [0.710, 0.561],
+    [1.128, 1.801], [1.306, 1.039], [1.946, 2.367], [3.079, 3.617], [4.323, 6.277]
 ])
 
 
@@ -219,6 +233,18 @@ def nms_bboxes(boxes):
     return boxes
 
 
+def draw_grid(img, dx, dy, line_color=(255, 255, 0), thickness=1, line_type=cv2.LINE_AA):
+    x = dx
+    y = dy
+    while x < img.shape[1]:
+        cv2.line(img, (x, 0), (x, img.shape[0]), color=line_color, lineType=line_type, thickness=thickness)
+        x += dx
+
+    while y < img.shape[0]:
+        cv2.line(img, (0, y), (img.shape[1], y), color=line_color, lineType=line_type, thickness=thickness)
+        y += dy
+
+
 def draw_boxes(image, boxes, labels, height, width):
     for box in boxes:
         xmin, ymin, xmax, ymax = absolute_bbox_cords(box, height, width)
@@ -247,12 +273,14 @@ def main(model_path, input_path):
         video_writer = skvideo.io.FFmpegWriter(video_out)
 
         for frame in tqdm(video_reader.nextFrame()):
+            frame, model_output = predict_model(model, frame)
             frame_h, frame_w, _ = frame.shape
-
-            _, model_output = predict_model(model, frame)
 
             parsed_bboxes = parse_predictions(model_output)
             detected_bboxes = nms_bboxes(parsed_bboxes)
+
+            if args.grid:
+                draw_grid(frame, img_w // grid_w, img_h // grid_h)
 
             draw_boxes(frame, detected_bboxes, classes, frame_w, frame_h)
 
