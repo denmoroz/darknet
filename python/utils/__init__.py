@@ -11,11 +11,11 @@ backup = backup
 
 
 def convert_label(name):
-    if "complementary" in name or "warning" in name or "yellow" in name or "winding--ramp" in name:
+    if  "complementary" in name or "warning" in name or "winding--ramp" in name
         return CLASSES[0], 0
-    elif "speed_limit" in name or "minimum" in name or "trucks-" in name or "end" in name or "other_white" in name or "speed-limit" in name or "night" in name:
+    elif "speed_limit" in name or "minimum" in name or "trucks-" in name or "end" in name or "speed-limit" in name or "night" in name:
         return CLASSES[1], 1
-    elif "car_part" in name or "truck" in name or "truk" in name or "car" in name or "minivan" in name or "van" in name or "bus" in name or "trailer" in name:
+    elif "car_part" in name or "car" in name:
         return CLASSES[2], 2
 
     return None, None
