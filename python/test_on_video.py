@@ -49,11 +49,11 @@ grid_w, grid_h = 16, 16
 
 num_anchors = 10
 num_classes = 3
-detect_threshold = 0.3
+detect_threshold = 0.5
 nms_threshold = 0.1
 
 classes = ['complementary_signs', 'white_signs', 'cars']
-colors = [(255, 0, 0), (0, 0, 255), (0, 255, 0)]
+colors = [(255, 255, 0), (255, 255, 255), (0, 255, 0)]
 
 # biases = np.array([
 #    [0.235, 0.216], [0.465, 0.371], [0.632, 0.630], [1.113, 0.807], [1.441, 1.368],
@@ -245,7 +245,7 @@ def draw_grid(img, dx, dy, line_color=(255, 255, 0), thickness=1, line_type=cv2.
         y += dy
 
 
-def draw_boxes(image, boxes, labels, height, width):
+def draw_boxes(image, boxes, labels, height, width, thickness=1, with_text=False):
     for box in boxes:
         xmin, ymin, xmax, ymax = absolute_bbox_cords(box, height, width)
 
@@ -255,13 +255,12 @@ def draw_boxes(image, boxes, labels, height, width):
 
         box_text = '%s %.2f' % (class_name, box.get_score())
 
-        cv2.rectangle(image, (xmin, ymin), (xmax, ymax), class_color, 2)
-        cv2.putText(image,
-                    box_text,
-                    (xmin, ymin - 13),
-                    cv2.FONT_HERSHEY_SIMPLEX,
-                    1e-3 * image.shape[0],
-                    class_color, 2)
+        cv2.rectangle(image, (xmin, ymin), (xmax, ymax), class_color, thickness)
+
+        if with_text:
+            cv2.putText(image, box_text, (xmin, ymin - 13),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1e-3 * image.shape[0],
+                        class_color, 1)
 
 
 def main(model_path, input_path):
