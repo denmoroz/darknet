@@ -40,10 +40,6 @@ argparser.add_argument(
     help='draw_grid'
 )
 
-
-# img_w, img_h = 544, 960
-# grid_w, grid_h = 17, 30
-
 img_w, img_h = 512, 512
 grid_w, grid_h = 16, 16
 
@@ -56,13 +52,13 @@ classes = ['complementary_signs', 'white_signs', 'cars']
 colors = [(255, 255, 0), (255, 255, 255), (0, 255, 0)]
 
 # biases = np.array([
-#    [0.235, 0.216], [0.465, 0.371], [0.632, 0.630], [1.113, 0.807], [1.441, 1.368],
-#    [2.418, 2.086], [2.437, 1.090], [4.085, 2.642], [6.040, 4.181], [7.753, 7.054]
+#     [0.163, 0.260], [0.289, 0.444], [0.424, 0.742], [0.694, 1.133], [0.710, 0.561],
+#     [1.128, 1.801], [1.306, 1.039], [1.946, 2.367], [3.079, 3.617], [4.323, 6.277]
 # ])
 
 biases = np.array([
-    [0.163, 0.260], [0.289, 0.444], [0.424, 0.742], [0.694, 1.133], [0.710, 0.561],
-    [1.128, 1.801], [1.306, 1.039], [1.946, 2.367], [3.079, 3.617], [4.323, 6.277]
+    [0.300, 0.455], [0.591, 0.871], [0.779, 5.194], [0.864, 1.479], [1.453, 2.069],
+    [2.188, 3.534], [3.540, 1.658], [3.970, 8.324], [4.443, 4.545], [8.790, 9.327]
 ])
 
 
@@ -266,8 +262,11 @@ def draw_boxes(image, boxes, labels, height, width, thickness=1, with_text=False
 def main(model_path, input_path):
     model = keras.models.load_model(model_path, compile=False, custom_objects={'DepthwiseConv2D': DepthwiseConv2D})
 
-    if input_path[-4:] == '.mp4':
-        video_out = input_path[:-4] + '_detected' + input_path[-4:]
+    video_path, video_file_name = os.path.split(input_path)
+    video_file_name, video_ext = os.path.splitext(video_file_name)
+
+    if video_ext.lower() in ('.mp4', '.mov'):
+        video_out = os.path.join(video_path, video_file_name + '_detected' + video_ext)
         video_reader = skvideo.io.FFmpegReader(input_path)
         video_writer = skvideo.io.FFmpegWriter(video_out)
 
